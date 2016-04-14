@@ -1,4 +1,4 @@
-$Script:defaultshortcutsfile="config.md"
+$Script:defaultshortcutsfile="main.md"
 $Script:guiconfig = @{}
 $Script:commandstorun = @()
 
@@ -34,6 +34,7 @@ function GenerateForm {
     $form1.DataBindings.DefaultDataSourceUpdateMode = 0
 
     $form_height = 0
+    $has_checkboxes = $False
 
     for ($i=0; $i -lt $Script:guiconfig.components.length; $i++) {
 
@@ -41,7 +42,9 @@ function GenerateForm {
         switch ($Script:guiconfig.components[$i].type) {
             
             "checkbox" {
+                $has_checkboxes = $True
                 $Script:guiconfig.components[$i].formobject = New-Object System.Windows.Forms.CheckBox
+                $Script:guiconfig.components[$i].formobject.AutoSize = $True
                 $System_Drawing_Point = New-Object System.Drawing.Point
                 $System_Drawing_Point.X = 10
                 $System_Drawing_Point.Y = $form_height
@@ -54,6 +57,10 @@ function GenerateForm {
 
             "button" {
                 $Script:guiconfig.components[$i].formobject = New-Object System.Windows.Forms.Button
+                $System_Drawing_Size = New-Object System.Drawing.Size
+                $System_Drawing_Size.Width = 280
+                $System_Drawing_Size.Height = 20
+                $Script:guiconfig.components[$i].formobject.Size = $System_Drawing_Size
                 $System_Drawing_Point = New-Object System.Drawing.Point
                 $System_Drawing_Point.X = 10
                 $System_Drawing_Point.Y = $form_height
@@ -76,6 +83,7 @@ function GenerateForm {
 
             "label" {
                 $Script:guiconfig.components[$i].formobject = New-Object System.Windows.Forms.Label
+                $Script:guiconfig.components[$i].formobject.AutoSize = $True
                 $System_Drawing_Point = New-Object System.Drawing.Point
                 $System_Drawing_Point.X = 10
                 $System_Drawing_Point.Y = $form_height+10
@@ -87,11 +95,42 @@ function GenerateForm {
 
         }
 
-        $Script:guiconfig.components[$i].formobject.AutoSize = $True
         $Script:guiconfig.components[$i].formobject.TabIndex = $i
         #$Script:guiconfig.components[$i].formobject.DataBindings.DefaultDataSourceUpdateMode = 0
 
         $form1.Controls.Add($Script:guiconfig.components[$i].formobject)
+    }
+
+
+
+    if ($has_checkboxes) {
+        $System_Drawing_Size = New-Object System.Drawing.Size
+        $System_Drawing_Size.Width = 280
+        $System_Drawing_Size.Height = 20
+        $System_Drawing_Point = New-Object System.Drawing.Point
+        $System_Drawing_Point.X = 10
+        $System_Drawing_Point.Y = $form_height
+        $form_height += 18
+        $button1 = New-Object System.Windows.Forms.Button
+        $button1.Size = $System_Drawing_Size
+        $button1.Location = $System_Drawing_Point
+        $button1.TabIndex = $apps.length+1
+        $button1.Name = "button1"
+        $button1.Text = "Run selected"
+        $button1.UseVisualStyleBackColor = $True
+        $button1.DataBindings.DefaultDataSourceUpdateMode = 0
+        $button1.add_Click({ 
+            $form1.Hide()
+            for ($i=0; $i -lt $Script:guiconfig.components.length; $i++) {
+                if ($Script:guiconfig.components[$i].formobject.Checked) {
+                    for ($j=0; $j -lt $Script:guiconfig.components[$i].commands.length; $j++) {
+                        $Script:commandstorun += $Script:guiconfig.components[$i].commands[$j]
+                    }
+                }
+            }
+            $form1.Close()
+        })
+        $form1.Controls.Add($button1)
     }
 
     $InitialFormWindowState = New-Object System.Windows.Forms.FormWindowState
@@ -99,40 +138,9 @@ function GenerateForm {
     $OnLoadForm_StateCorrection = {
         $form1.WindowState = $InitialFormWindowState
     }
-
-
-
-    $System_Drawing_Size = New-Object System.Drawing.Size
-    $System_Drawing_Size.Width = 280
-    $System_Drawing_Size.Height = 20
-    $System_Drawing_Point = New-Object System.Drawing.Point
-    $System_Drawing_Point.X = 10
-    $System_Drawing_Point.Y = $form_height
-    $form_height += 18
-    $button1 = New-Object System.Windows.Forms.Button
-    $button1.Size = $System_Drawing_Size
-    $button1.Location = $System_Drawing_Point
-    $button1.TabIndex = $apps.length+1
-    $button1.Name = "button1"
-    $button1.Text = "Run selected"
-    $button1.UseVisualStyleBackColor = $True
-    $button1.DataBindings.DefaultDataSourceUpdateMode = 0
-    $button1.add_Click({ 
-        $form1.Hide()
-        for ($i=0; $i -lt $Script:guiconfig.components.length; $i++) {
-            if ($Script:guiconfig.components[$i].formobject.Checked) {
-                for ($j=0; $j -lt $Script:guiconfig.components[$i].commands.length; $j++) {
-                    $Script:commandstorun += $Script:guiconfig.components[$i].commands[$j]
-                }
-            }
-        }
-        $form1.Close()
-    })
-    $form1.Controls.Add($button1)
-
     $System_Drawing_Size = New-Object System.Drawing.Size
     $System_Drawing_Size.Width = 300
-    $System_Drawing_Size.Height = 10+(20*$Script:guiconfig.components.length)+10+20+10
+    $System_Drawing_Size.Height = $form_height+10
     $form1.ClientSize = $System_Drawing_Size
 
     $InitialFormWindowState = $form1.WindowState
