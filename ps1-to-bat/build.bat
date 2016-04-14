@@ -9,6 +9,8 @@ ECHO.
 ECHO %polyfile%
 ECHO +
 ECHO %infile%
+ECHO +
+ECHO PAUSE
 ECHO =
 ECHO %outfile%
 ECHO.
@@ -16,6 +18,8 @@ ECHO.
 TYPE %polyfile% > %outfile%
 ECHO.>>%outfile%
 TYPE %infile% >> %outfile%
+ECHO.>>%outfile%
+ECHO PAUSE >> %outfile%
 
 ECHO.
 ECHO Done
