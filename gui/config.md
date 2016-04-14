@@ -1,3 +1,4 @@
+wd:.\..
 #Example
 ###button:ipconfig
 `ipconfig`

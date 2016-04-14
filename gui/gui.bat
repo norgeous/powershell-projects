@@ -211,10 +211,10 @@ function Initialize-Shortcutsbat($Local:configlocation) {
         Foreach ($Local:line in $Local:shortcutstxt) {
 
             # if line starts with '##wd='
-            If ($Local:line.StartsWith('##wd=')) {
+            If ($Local:line.StartsWith('wd:')) {
 
                 # use the remainder of the line as the new working dir
-                $Local:wd = $Local:line.Substring(5).Trim()
+                $Local:wd = $Local:line -replace 'wd:', ''
 
             }
 
@@ -253,6 +253,9 @@ function Initialize-Shortcutsbat($Local:configlocation) {
 
                 Write-Host
                 Write-Color -Magenta (' Working directory: "{0}" was not found' -f $Local:wd)
+                Write-Host $pwd
+                Write-Host (Test-StringEmpty $Local:wd)
+                Write-Host (Test-Path "$Local:wd")
                 Write-Host
 
             } Else {
@@ -272,7 +275,7 @@ function Initialize-Shortcutsbat($Local:configlocation) {
                 
                 # show some configuration info (header)
                 Write-Color -Gray ' shorcuts from:'   "`t`t" -Green "$Local:shortcutsfile"
-                Write-Color -Gray ' working directory:' "`t" -Green "$Local:wd"
+                Write-Color -Gray ' working directory:' "`t" -Green "$pwd"
                 
                 If ($Local:after -ne "") {
                     Write-Color -Gray ' after each command:' -DarkGreen "`t" '& ' $Local:after
@@ -280,7 +283,6 @@ function Initialize-Shortcutsbat($Local:configlocation) {
 
                 Write-Host
                 Write-Color -Gray ' parsing config file...'
-                Write-Host
 
                 # parse config.md to config hash array
                 
@@ -335,14 +337,17 @@ function Initialize-Shortcutsbat($Local:configlocation) {
                     }
                 }
 
+
                 # create gui query
+                Write-Color -Gray ' making gui...'
                 GenerateForm
                 # code blocked until form returns
 
-                Clear-Host
+                Write-Host
 
                 foreach ($command in $Script:commandstorun) {
                     Write-Host ">>" $command
+                    Write-Host
                     iex $command
                     Write-Host
                 }
